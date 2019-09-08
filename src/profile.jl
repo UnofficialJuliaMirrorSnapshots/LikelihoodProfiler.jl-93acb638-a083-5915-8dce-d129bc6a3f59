@@ -56,6 +56,7 @@ function profile(
             theta_full = copy(theta_init)
             splice!(theta_full, theta_num, x)
             loss = loss_func(theta_full)
+
             # return
             ProfilePoint(
                 x,
@@ -82,8 +83,15 @@ function profile(
             loss_func_rest = (theta_rest::Array{Float64, 1}, g::Array{Float64, 1}) -> begin
                 theta_full = copy(theta_rest)
                 splice!(theta_full, theta_num:(theta_num-1), x)
+                try
+                    loss = loss_func(theta_full)
+                catch e
+                    @warn "Error when call loss_func($theta_full)"
+                    throw(e)
+                end
                 counter += 1 # update counter
-                loss_func(theta_full)
+
+                return loss
             end
             # set optimizer
             min_objective!(opt, loss_func_rest)
