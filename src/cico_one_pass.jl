@@ -42,16 +42,26 @@ function get_right_endpoint(
     ftol_abs!(local_opt, scan_tol) #ftol_abs
 
     # Constraints function
+    out_of_bound::Bool = false
     function constraints_func(x, g)
-        loss = loss_func(x)
+        # this part is necessary to understand the difference between
+        # "stop out of bounds" and "stop because of function call error"
+        try
+            loss = loss_func(x)
+        catch e
+            @warn "Error when call loss_func($x)"
+            throw(e)
+        end
+
         if (loss < 0.) && (scan_func(x) > scan_bound)
+            out_of_bound = true
             throw(ForcedStop("Out of the scan bound but in ll constraint."))
         #elseif isapprox(loss, 0., atol=loss_tol)
-        #    @warn "loss_tol reached... but..."
-        #    return loss
-        else
-            return loss
+            #@warn "loss_tol reached... but..."
+            #return loss
         end
+
+        return loss
     end
 
     # constrain optimizer
@@ -61,10 +71,6 @@ function get_right_endpoint(
         opt,
         (x, g) -> scan_func(x)
         )
-    lb = [theta_bounds[i][1] for i in 1:n_theta] # minimum.(theta_bounds)
-    ub = [theta_bounds[i][2] for i in 1:n_theta] # maximum.(theta_bounds)
-    lower_bounds!(opt, lb)
-    upper_bounds!(opt, ub)
     local_optimizer!(opt, local_opt)
     maxeval!(opt, max_iter)
 
@@ -74,23 +80,39 @@ function get_right_endpoint(
         constraints_func,
         loss_tol
     )
+    [ inequality_constraint!(
+        opt,
+        (x, g) -> x[i] - theta_bounds[i][2],
+        0.
+    ) for i in 1:n_theta ]
+    [ inequality_constraint!(
+        opt,
+        (x, g) -> theta_bounds[i][1] - x[i],
+        0.
+    ) for i in 1:n_theta ]
 
     # start optimization
     (optf, optx, ret) = optimize(opt, theta_init)
 
-    if ret == :FORCED_STOP
+    if (ret == :FORCED_STOP && !out_of_bound)
+        pp = ProfilePoint[]
+        res = (nothing, pp, :LOSS_ERROR_STOP)
+    elseif ret == :MAXEVAL_REACHED
+        pp = ProfilePoint[]
+        res = (nothing, pp, :MAX_ITER_STOP)
+    elseif (ret == :FORCED_STOP && out_of_bound) # successfull result
         pp = ProfilePoint[]
         res = (nothing, pp, :SCAN_BOUND_REACHED)
-    elseif ret == :FTOL_REACHED
+    elseif ret == :FTOL_REACHED # successfull result
         loss = loss_func(optx)
         pp = [ ProfilePoint(optf, loss, optx, ret, nothing) ]
         res = (optf, pp, :BORDER_FOUND_BY_SCAN_TOL)
-    elseif ret == :MAXEVAL_REACHED
-        pp = ProfilePoint[]
-        res = (nothing, pp, :MAX_ITER_REACHED)
     else
-        pp = ProfilePoint[]
-        res = (nothing, pp, :UNKNOWN_STOP)
+        # this part is not normally reached, just for case
+        throw(ErrorException("No interpretation of the optimization results."))
+        # do not throw
+        #pp = ProfilePoint[]
+        #res = (nothing, pp, :UNKNOWN_STOP)
     end
 
     return res
