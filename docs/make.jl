@@ -19,7 +19,7 @@ deploydocs(
     repo   = "github.com/insysbio/LikelihoodProfiler.jl.git",
     deps   = nothing,
     make = nothing,
-    julia = "0.7",
+    julia = "1.1",
     osname = "linux",
     target = "build"
 )

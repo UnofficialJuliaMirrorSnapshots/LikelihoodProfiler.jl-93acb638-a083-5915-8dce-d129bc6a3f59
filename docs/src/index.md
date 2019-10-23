@@ -13,14 +13,7 @@
 ```julia
 julia> ]
 
-julia> add LikelihoodProfiler
-```
-
-if you are on Julia <=0.7
-```julia
-julia> import Pkg
-
-julia> Pkg.add("LikelihoodProfiler")
+(v1.2) pkg> add LikelihoodProfiler
 ```
 
 ## Quick start

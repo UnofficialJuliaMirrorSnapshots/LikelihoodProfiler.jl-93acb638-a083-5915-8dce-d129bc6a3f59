@@ -23,16 +23,8 @@ See [documentation](https://insysbio.github.io/LikelihoodProfiler.jl/latest/).
 ```julia
 julia> ]
 
-julia> add LikelihoodProfiler
+(v1.2) pkg> add LikelihoodProfiler
 ```
-
-if you are on Julia <=0.7
-```julia
-julia> import Pkg
-
-julia> Pkg.add("LikelihoodProfiler")
-```
-
 
 # Quick start
 
