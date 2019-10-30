@@ -6,21 +6,15 @@
  Case | Ref
  ----|----
  PK model with saturation in elimination | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/insysbio/LikelihoodProfiler.jl/master?filepath=%2Fnotebook%2Fpk_saturation.ipynb)
-
+ Local optim methods comparison | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/insysbio/LikelihoodProfiler.jl/master?filepath=notebook%2FDerivative-free%20algs%20comparison.ipynb)
+ 
 ## Installation
 
 
 ```julia
 julia> ]
 
-julia> add LikelihoodProfiler
-```
-
-if you are on Julia <=0.7
-```julia
-julia> import Pkg
-
-julia> Pkg.add("LikelihoodProfiler")
+(v1.2) pkg> add LikelihoodProfiler
 ```
 
 ## Quick start
@@ -66,7 +60,7 @@ The package introduces several original algorithms taking into account the follo
 
 This algorithms can be applied to complex kinetic models where function differentiability is not guaranteed and each likelihood estimation is computationally expensive.  
 
-The package introduces original "one-pass" algorithm: **Confidence Intervals evaluation by Constrained Optimization** [6]  (`:CICO_ONE_PASS`) developed by the authors of this package. `:CICO_ONE_PASS` utilizes the **Inequality-based Constrained Optimization** [3-4] for efficient determination of confidence intervals and detection of “non-identifiable” parameters.  
+The package introduces original "one-pass" algorithm: **Confidence Intervals evaluation by Constrained Optimization** [6]  `:CICO_ONE_PASS` developed by the authors of this package. `:CICO_ONE_PASS` utilizes the **Inequality-based Constrained Optimization** [3-4] for efficient determination of confidence intervals and detection of “non-identifiable” parameters.  
 
 The "multi-pass" methods use extrapolation/interpolation of likelihood points to the critical level: linear (`:LIN_EXTRAPOL`) and quadratic (`:QUADR_EXTRAPOL`) approaches. They are also effective for both identifiable and non-identifiable parameters.
 
